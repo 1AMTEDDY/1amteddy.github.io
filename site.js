@@ -17,6 +17,9 @@
         btns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.view === v)); });
       };
       btns.forEach(function (b) { b.addEventListener('click', function () { set(b.dataset.view); }); });
+      var phone = matchMedia('(max-width: 720px)');
+      var keep = function () { if (phone.matches) set('gallery'); };
+      keep(); if (phone.addEventListener) phone.addEventListener('change', keep);
     }
   } catch (_) {}
 
@@ -100,5 +103,19 @@
       try { if (next === 'system') localStorage.removeItem('theme'); else localStorage.setItem('theme', next); } catch (_) {}
       paint(next);
     });
+  } catch (_) {}
+})();
+
+// Highlight the section you are in (shows on the phone bottom nav).
+(function () {
+  try {
+    if (!('IntersectionObserver' in window)) return;
+    var links = {};
+    document.querySelectorAll('.nav a[href^="#"]').forEach(function (a) { links[a.getAttribute('href').slice(1)] = a; });
+    var set = function (id) { Object.keys(links).forEach(function (k) { if (k === id) links[k].setAttribute('aria-current', 'true'); else links[k].removeAttribute('aria-current'); }); };
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) set(e.target.id === 'commh' ? 'work' : e.target.id); });
+    }, { rootMargin: '-45% 0px -50% 0px' });
+    Object.keys(links).forEach(function (k) { var el = document.getElementById(k); if (el) io.observe(el); });
   } catch (_) {}
 })();
